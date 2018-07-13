@@ -50,8 +50,10 @@ def partition(matrix):
         ])
     return tiledMatrix
 
-def strassenMultiply(a, b):
+def strassenMultiplyGeo(a, b):
     """Apply Strassen algorithm to two square matrices.
+    Assumes number of rows/columns for a and b is a member of the base 2
+    geometric progression.
     Args:
         a: The matrix on the left of a * b.
         b: The matrix on the right of a * b.
@@ -62,13 +64,13 @@ def strassenMultiply(a, b):
         return np.dot(a, b)
     a = partition(a)
     b = partition(b)
-    m1 = strassenMultiply(a[0, 0] + a[1, 1], b[0, 0] + b[1, 1])
-    m2 = strassenMultiply(a[1, 0] + a[1, 1], b[0, 0])
-    m3 = strassenMultiply(a[0, 0], b[0, 1] - b[1, 1])
-    m4 = strassenMultiply(a[1, 1], b[1, 0] - b[0, 0])
-    m5 = strassenMultiply(a[0, 0] + a[0, 1], b[1, 1])
-    m6 = strassenMultiply(a[1, 0] - a[0, 0], b[0, 0] + b[0, 1])
-    m7 = strassenMultiply(a[0, 1] - a[1, 1], b[1, 0] + b[1, 1])
+    m1 = strassenMultiplyGeo(a[0, 0] + a[1, 1], b[0, 0] + b[1, 1])
+    m2 = strassenMultiplyGeo(a[1, 0] + a[1, 1], b[0, 0])
+    m3 = strassenMultiplyGeo(a[0, 0], b[0, 1] - b[1, 1])
+    m4 = strassenMultiplyGeo(a[1, 1], b[1, 0] - b[0, 0])
+    m5 = strassenMultiplyGeo(a[0, 0] + a[0, 1], b[1, 1])
+    m6 = strassenMultiplyGeo(a[1, 0] - a[0, 0], b[0, 0] + b[0, 1])
+    m7 = strassenMultiplyGeo(a[0, 1] - a[1, 1], b[1, 0] + b[1, 1])
     upperLeft = m1 + m4 - m5 + m7
     upperRight = m3 + m5
     lowerLeft = m2 + m4
@@ -76,3 +78,28 @@ def strassenMultiply(a, b):
     upper = np.concatenate((upperLeft, upperRight), axis = 1)
     lower = np.concatenate((lowerLeft, lowerRight), axis = 1)
     return np.concatenate((upper, lower), axis = 0)
+
+def strassenMultiply(a, b):
+    """Apply Strassen algorithm to two square matrices.
+    Runs fill on a and b to ensure their number of rows/columns is a member of
+    the base 2 geometric progression.
+    Args:
+        a: The matrix on the left of a * b.
+        b: The matrix on the right of a * b.
+    Returns:
+        The matrix product of a and b.
+    Raises:
+        ValueError: Matrices a and b were not square and of equal size.
+    """ 
+    if len(a) != len(a[1]):
+        raise ValueError('a is not a square matrix.')
+    if len(b) != len(b[1]):
+        raise ValueError('b is not a square matrix.')
+    if len(a) != len(b):
+        raise ValueError('Matrices are not aligned.')
+    n = len(a)
+    a = fill(a)
+    b = fill(b)
+    geoProduct = strassenMultiplyGeo(a, b)
+    product = [row[ : n] for row in geoProduct[ : n]] # strip 0's
+    return np.array(product)
