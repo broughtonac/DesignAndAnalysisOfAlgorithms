@@ -2,7 +2,10 @@
 
 This repository contains Python 3 implementations of algorithms studied in MIT's 
 *Design and Analysis of Algorithms* as taught in Spring 2015 (course number: 
-6.046J).
+6.046J). The idea is that each file corresponds to an algorithm and contains, 
+along with its core implementation, some auxiliary functions that'll either
+make running the algorithm easier or will serve some pedogogical purposes. The 
+module can then be easily imported into an IPython shell and experimented with.
 
 <!-- ## Getting Started
 
