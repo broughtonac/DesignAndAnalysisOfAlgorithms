@@ -1,6 +1,6 @@
 # DesignAndAnalysisOfAlgorithms
 
-This repository contains Python 3 implementations of algorithms studied in MIT's 
+This repository contains (fast and loose) Python 3 implementations of algorithms studied in MIT's 
 *Design and Analysis of Algorithms* as taught in Spring 2015 (course number: 
 6.046J). The idea is that each file corresponds to an algorithm and contains, 
 along with its core implementation, some auxiliary functions that'll either
