@@ -130,7 +130,7 @@ def median_of_medians(nums):  # here we 'pick x cleverly'
     return pivot
 
 
-def fastMedian(nums):  # O(n)
+def fast_median(nums):  # O(n)
     """Finds the median of a list of numerics.
     This is a fast deterministic algorithm for finding the median which uses
     quick_select with median_of_medians.

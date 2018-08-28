@@ -16,7 +16,7 @@ def random_points(size, x_range, y_range):
         A set of size tuples, each of which is an (x, y)-coordinate.
     """
     # assumptions: no two points are the same and no 3 points fall on a
-    # vertical line
+    #     vertical line
     points = {}  # keys = coordinates, values = repeat counts
     while len(points) < size:
         x = random.random() * x_range
