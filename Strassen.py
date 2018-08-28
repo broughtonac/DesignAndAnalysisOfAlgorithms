@@ -1,7 +1,8 @@
 import numpy as np
 import math
 
-def randomMatrix(n):
+
+def random_matrix(n):
     """Generates a random n by n matrix.
     Formed from numpy array objects.
     Args:
@@ -10,6 +11,7 @@ def randomMatrix(n):
         A numpy array consisting of n numpy arrays, each n elements long.
     """
     return np.random.random((n, n))
+
 
 def fill(matrix):
     """If necessary, increases matrix size and fills with 0's.
@@ -26,10 +28,11 @@ def fill(matrix):
     n = len(matrix)
     if math.log(n, 2) - math.floor(math.log(n, 2)) != 0:
         k = math.floor(math.log(n, 2)) + 1
-        newN = 2 ** k
-        padding = newN - n
+        new_n = 2 ** k
+        padding = new_n - n
         matrix = np.pad(matrix, [(0, padding), (0, padding)], 'constant')
     return matrix
+
 
 def partition(matrix):
     """Divides matrix into 4 submatrices, represented as a tiled matrix.
@@ -39,18 +42,19 @@ def partition(matrix):
         A numpy array of 4 submatrices.
     """
     n = len(matrix)
-    newN = int(2 ** (math.log(n, 2) - 1))
-    upperLeft = matrix[ : newN, : newN]
-    upperRight = matrix[ : newN, newN : ]
-    lowerLeft = matrix[newN : , : newN]
-    lowerRight = matrix[newN : , newN : ]
-    tiledMatrix = np.array([
-            [upperLeft, upperRight],
-            [lowerLeft, lowerRight]
-        ])
-    return tiledMatrix
+    new_n = int(2 ** (math.log(n, 2) - 1))
+    upper_left = matrix[: new_n, : new_n]
+    upper_right = matrix[: new_n, new_n:]
+    lower_left = matrix[new_n:, : new_n]
+    lower_right = matrix[new_n:, new_n:]
+    tiled_matrix = np.array([
+        [upper_left, upper_right],
+        [lower_left, lower_right]
+    ])
+    return tiled_matrix
 
-def strassenMultiplyGeo(a, b):
+
+def strassen_multiply_geo(a, b):
     """Apply Strassen algorithm to two square matrices.
     Assumes number of rows/columns for a and b is a member of the base 2
     geometric progression.
@@ -64,22 +68,23 @@ def strassenMultiplyGeo(a, b):
         return np.dot(a, b)
     a = partition(a)
     b = partition(b)
-    m1 = strassenMultiplyGeo(a[0, 0] + a[1, 1], b[0, 0] + b[1, 1])
-    m2 = strassenMultiplyGeo(a[1, 0] + a[1, 1], b[0, 0])
-    m3 = strassenMultiplyGeo(a[0, 0], b[0, 1] - b[1, 1])
-    m4 = strassenMultiplyGeo(a[1, 1], b[1, 0] - b[0, 0])
-    m5 = strassenMultiplyGeo(a[0, 0] + a[0, 1], b[1, 1])
-    m6 = strassenMultiplyGeo(a[1, 0] - a[0, 0], b[0, 0] + b[0, 1])
-    m7 = strassenMultiplyGeo(a[0, 1] - a[1, 1], b[1, 0] + b[1, 1])
-    upperLeft = m1 + m4 - m5 + m7
-    upperRight = m3 + m5
-    lowerLeft = m2 + m4
-    lowerRight = m1 - m2 + m3 + m6    
-    upper = np.concatenate((upperLeft, upperRight), axis = 1)
-    lower = np.concatenate((lowerLeft, lowerRight), axis = 1)
-    return np.concatenate((upper, lower), axis = 0)
+    m1 = strassen_multiply_geo(a[0, 0] + a[1, 1], b[0, 0] + b[1, 1])
+    m2 = strassen_multiply_geo(a[1, 0] + a[1, 1], b[0, 0])
+    m3 = strassen_multiply_geo(a[0, 0], b[0, 1] - b[1, 1])
+    m4 = strassen_multiply_geo(a[1, 1], b[1, 0] - b[0, 0])
+    m5 = strassen_multiply_geo(a[0, 0] + a[0, 1], b[1, 1])
+    m6 = strassen_multiply_geo(a[1, 0] - a[0, 0], b[0, 0] + b[0, 1])
+    m7 = strassen_multiply_geo(a[0, 1] - a[1, 1], b[1, 0] + b[1, 1])
+    upper_left = m1 + m4 - m5 + m7
+    upper_right = m3 + m5
+    lower_left = m2 + m4
+    lower_right = m1 - m2 + m3 + m6
+    upper = np.concatenate((upper_left, upper_right), axis=1)
+    lower = np.concatenate((lower_left, lower_right), axis=1)
+    return np.concatenate((upper, lower), axis=0)
 
-def strassenMultiply(a, b):
+
+def strassen_multiply(a, b):
     """Apply Strassen algorithm to two square matrices.
     Runs fill on a and b to ensure their number of rows/columns is a member of
     the base 2 geometric progression.
@@ -90,7 +95,7 @@ def strassenMultiply(a, b):
         The matrix product of a and b.
     Raises:
         ValueError: Matrices a and b were not square and of equal size.
-    """ 
+    """
     if len(a) != len(a[1]):
         raise ValueError('a is not a square matrix.')
     if len(b) != len(b[1]):
@@ -100,6 +105,6 @@ def strassenMultiply(a, b):
     n = len(a)
     a = fill(a)
     b = fill(b)
-    geoProduct = strassenMultiplyGeo(a, b)
-    product = [row[ : n] for row in geoProduct[ : n]] # strip 0's
+    geo_product = strassen_multiply_geo(a, b)
+    product = [row[: n] for row in geo_product[: n]]  # strip 0's
     return np.array(product)

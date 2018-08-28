@@ -3,23 +3,24 @@ import matplotlib.pyplot as plt
 from collections import deque
 import math
 
-def randomPoints(size, xRange, yRange):
+
+def random_points(size, x_range, y_range):
     """Generates random (x, y)-coordinates.
-    A point's x-coordinate has lower bound 0 and upper bound xRange; its
-    y-coordinate has lower bound 0 and upper bound yRange.
+    A point's x-coordinate has lower bound 0 and upper bound x_range; its
+    y-coordinate has lower bound 0 and upper bound y_range.
     Args:
         size: The number of points to generate.
-        xRange: The upper bound for the x-coordinates.
-        yRange: The upper bound for the y-coordinates.
+        x_range: The upper bound for the x-coordinates.
+        y_range: The upper bound for the y-coordinates.
     Returns:
         A set of size tuples, each of which is an (x, y)-coordinate.
     """
     # assumptions: no two points are the same and no 3 points fall on a
     # vertical line
-    points = {} # keys = coordinates, values = repeat counts
+    points = {}  # keys = coordinates, values = repeat counts
     while len(points) < size:
-        x = random.random() * xRange
-        y = random.random() * yRange
+        x = random.random() * x_range
+        y = random.random() * y_range
         if x != y:
             if x not in points:
                 points[(x, y)] = 1
@@ -27,7 +28,8 @@ def randomPoints(size, xRange, yRange):
                 points[(x, y)] += 1
     return list(points.keys())
 
-def plotPoints(points):
+
+def plot_points(points):
     """Plots (x, y)-coordinates in the plane using matplotlib.
     Args:
         points: A list of (x, y)-coordinates, each of which is a tuple.
@@ -36,8 +38,9 @@ def plotPoints(points):
         x = points[i][0]
         y = points[i][1]
         plt.plot(x, y, 'bo')
-        plt.text(x * 1.01, y * 1.01, i, fontsize = 10)
+        plt.text(x * 1.01, y * 1.01, i, fontsize=10)
     plt.show()
+
 
 def initialize(points):
     """Sorts a list of (x, y)-coordinates by x-coordinate.
@@ -45,8 +48,9 @@ def initialize(points):
         points: A list of (x, y)-coordinates, each of which is a tuple.
     """
     # sorting necessary for balanced divisions
-    points.sort(key = lambda p: p[0]) # sort once and for all
+    points.sort(key=lambda p: p[0])  # sort once and for all
     return points
+
 
 def divide(points):
     """Divides a list of points into left and right subproblems.
@@ -60,25 +64,27 @@ def divide(points):
         A tuple of the left and right subproblems.
     """
     m = len(points) // 2
-    leftSub = points[ : m]
-    rightSub = points[m : ]
-    return (leftSub, rightSub)
+    left_sub = points[: m]
+    right_sub = points[m:]
+    return (left_sub, right_sub)
 
-def computeVertical(leftSub, rightSub):
+
+def compute_vertical(left_sub, right_sub):
     """Finds an x-coordinate that separates the two subproblems.
     Args:
-        leftSub: The first element of the tuple in the output of divide. It's a
+        left_sub: The first element of the tuple in the output of divide. It's a
             list of points sorted by ascending x-coordinate.
-        rightSub: The second element of the tuple in the output of divide. It's
+        right_sub: The second element of the tuple in the output of divide. It's
             a list of points sorted by ascending x-coordinate.
     Returns:
-        An x-coordinate halfway between the right-most point of leftSub and the
-        left-most point of rightSub.
+        An x-coordinate halfway between the right-most point of left_sub and the
+        left-most point of right_sub.
     """
-    vertical = (leftSub[-1][0] + rightSub[0][0]) / 2
+    vertical = (left_sub[-1][0] + right_sub[0][0]) / 2
     return vertical
 
-def polarSort(points, reverse = False):
+
+def polar_sort(points, reverse=False):
     """Sorts points by theta.
     Theta is the angle made between x-axis and a vector from the origin to a
     point in the plane.
@@ -95,18 +101,21 @@ def polarSort(points, reverse = False):
         center[1] += p[1]
     center[0] /= len(points)
     center[1] /= len(points)
+
     def theta(p):
         # computes theta for the point p
-        deltaY = p[1] - center[1]
-        deltaX = p[0] - center[0]
-        angle = math.atan2(deltaY, deltaX)
+        delta_y = p[1] - center[1]
+        delta_x = p[0] - center[0]
+        angle = math.atan2(delta_y, delta_x)
         if angle < 0:
             angle += 2 * math.pi
         return angle
-    points.sort(key = theta, reverse = not reverse)
+
+    points.sort(key=theta, reverse=not reverse)
     return points
 
-def bruteForce(points): # O(n^3) base case
+
+def brute_force(points):  # O(n^3) base case
     """Computes the convex hull of points, but naively.
     This algorithm is used as the base case for the O(n lg n) solution.
     Args:
@@ -116,55 +125,62 @@ def bruteForce(points): # O(n^3) base case
         the right-most point if points is a left subhull. It begins with the
         left-most point if it's a right subhull.
     """
-    def isTangent(segment): # segment = ((x1, y1), (x2, y2))
+
+    def is_tangent(segment):  # segment = ((x1, y1), (x2, y2))
         # checks if points are all on one side (left or right) of segment
-        def invLineEqn(seg): # x = (y - b) / m
+        def inv_line_eqn(seg):  # x = (y - b) / m
             def x(y):
                 m = (seg[1][1] - seg[0][1]) / (seg[1][0] - seg[0][0])
                 b = -m * seg[1][0] + seg[1][1]
                 return (y - b) / m
-            return x # note the closure
-        g = invLineEqn(segment) # g(y) = (y - b) / m
+
+            return x  # note the closure
+
+        g = inv_line_eqn(segment)  # g(y) = (y - b) / m
         sides = set()
         for p in points:
             if segment[0] != p and segment[1] != p:
-                if g(p[1]) > p[0]: # applying the closured function
+                if g(p[1]) > p[0]:  # applying the closure
                     sides.add('left')
                 else:
                     sides.add('right')
                 if len(sides) == 2:
                     return False
         return True
+
     def findTangents():
         subhull = []
-        addedPoints = set()
+        added_points = set()
         for i in range(len(points) - 1):
             p1 = points[i]
-            for p2 in points[i + 1 : ]: # avoids checking segments repetitively
+            for p2 in points[i + 1:]:  # avoids checking segments repetitively
                 segment = (p1, p2)
-                if isTangent(segment):
-                    if segment[0] not in addedPoints:
-                        addedPoints.add(segment[0])
+                if is_tangent(segment):
+                    if segment[0] not in added_points:
+                        added_points.add(segment[0])
                         subhull.append(segment[0])
-                    if segment[1] not in addedPoints:
-                        addedPoints.add(segment[1])
+                    if segment[1] not in added_points:
+                        added_points.add(segment[1])
                         subhull.append(segment[1])
-        orderedHull = deque(polarSort(subhull))
-        return orderedHull
+        ordered_hull = deque(polar_sort(subhull))
+        return ordered_hull
+
     return findTangents()
 
-def twoFinger(leftSub, rightSub, vert):
+
+def two_finger(left_sub, right_sub, vert):
     """Finds the upper and lower tangents for the hull formed by merging left
     and right subhulls.
     Args:
-        leftSub: A list of points for the left subhull (clockwise order).
-        rightSub: A list of points for the right subhull (clockwise order).
+        left_sub: A list of points for the left subhull (clockwise order).
+        right_sub: A list of points for the right subhull (clockwise order).
         vert: An x-coordinate specifying the vertical divider.
     Returns:
         A tuple containing the upper and lower tangents, each of which is a
         tuple of 2 points.
     """
-    def vertIntercept(p1, p2, vertical): # p1 = (x1, y1) and p2 = (x2, y2)
+
+    def vert_intercept(p1, p2, vertical):  # p1 = (x1, y1) and p2 = (x2, y2)
         # Takes p1 from the left subproblem and p2 from the right subproblem.
         # Takes vertical, the x-coordinate specifying the vertical divider.
         # Returns y-coordinate at intersection between line formed by p1 and
@@ -176,58 +192,61 @@ def twoFinger(leftSub, rightSub, vert):
         b = y1 - m * x1
         y_v = (m * x_v) + b
         return y_v
-    upperTangent = None
+
+    upper_tangent = None
     i = 0
     j = 0
     while True:
-        y1 = vertIntercept(leftSub[i], rightSub[(j + 1) % len(rightSub)], vert)
-        y2 = vertIntercept(leftSub[i], rightSub[j], vert)
-        y3 = vertIntercept(leftSub[(i - 1) % len(leftSub)], rightSub[j], vert)
+        y1 = vert_intercept(left_sub[i], right_sub[(j + 1) % len(right_sub)], vert)
+        y2 = vert_intercept(left_sub[i], right_sub[j], vert)
+        y3 = vert_intercept(left_sub[(i - 1) % len(left_sub)], right_sub[j], vert)
         if y1 > y2:
-            j = (j + 1) % len(rightSub)
+            j = (j + 1) % len(right_sub)
         elif y3 > y2:
-            i = (i - 1) % len(leftSub)
+            i = (i - 1) % len(left_sub)
         else:
-            upperTangent = (leftSub[i], rightSub[j])
+            upper_tangent = (left_sub[i], right_sub[j])
             break
-    lowerTangent = None
+    lower_tangent = None
     i = 0
     j = 0
     while True:
-        y1 = vertIntercept(leftSub[i], rightSub[(j - 1) % len(rightSub)], vert)
-        y2 = vertIntercept(leftSub[i], rightSub[j], vert)
-        y3 = vertIntercept(leftSub[(i + 1) % len(leftSub)], rightSub[j], vert)
+        y1 = vert_intercept(left_sub[i], right_sub[(j - 1) % len(right_sub)], vert)
+        y2 = vert_intercept(left_sub[i], right_sub[j], vert)
+        y3 = vert_intercept(left_sub[(i + 1) % len(left_sub)], right_sub[j], vert)
         if y1 < y2:
-            j = (j - 1) % len(rightSub)
+            j = (j - 1) % len(right_sub)
         elif y3 < y2:
-            i = (i + 1) % len(leftSub)
+            i = (i + 1) % len(left_sub)
         else:
-            lowerTangent = (leftSub[i], rightSub[j])
+            lower_tangent = (left_sub[i], right_sub[j])
             break
-    return (upperTangent, lowerTangent)
-        
-def cutAndPaste(leftSub, rightSub, upperTangent, lowerTangent):
+    return (upper_tangent, lower_tangent)
+
+
+def cut_and_paste(left_sub, right_sub, upper_tangent, lower_tangent):
     """Merges the left and right subhulls.
     Args:
-        leftSub: A list of points for the left subhull (clockwise order).
-        rightSub: A list of points for the right subhull (clockwise order).
-        upperTangent: A segment to be the new upper tangent of the merged hull.
-        lowerTangent: A segment to be the new lower tangent of the merged hull.
+        left_sub: A list of points for the left subhull (clockwise order).
+        right_sub: A list of points for the right subhull (clockwise order).
+        upper_tangent: A segment to be the new upper tangent of the merged hull.
+        lower_tangent: A segment to be the new lower tangent of the merged hull.
     Returns:
-        A new hull (with points ordered clockwise) formed by merging leftSub
-        and rightSub.
+        A new hull (with points ordered clockwise) formed by merging left_sub
+        and right_sub.
     """
-    hull = deque([upperTangent[0]])
-    j = rightSub.index(upperTangent[1])
-    while rightSub[j] != lowerTangent[1]:
-        hull.append(rightSub[j])
-        j = (j + 1) % len(rightSub)
-    hull.append(rightSub[j])
-    i = leftSub.index(lowerTangent[0])
-    while leftSub[i] != upperTangent[0]:
-        hull.append(leftSub[i])
-        i = (i + 1) % len(leftSub)
+    hull = deque([upper_tangent[0]])
+    j = right_sub.index(upper_tangent[1])
+    while right_sub[j] != lower_tangent[1]:
+        hull.append(right_sub[j])
+        j = (j + 1) % len(right_sub)
+    hull.append(right_sub[j])
+    i = left_sub.index(lower_tangent[0])
+    while left_sub[i] != upper_tangent[0]:
+        hull.append(left_sub[i])
+        i = (i + 1) % len(left_sub)
     return hull
+
 
 def solve(points, n):
     """Computes the convex hull of a list of points via divide and conquer.
@@ -239,27 +258,29 @@ def solve(points, n):
         coordinates.
     """
     points = initialize(points)
+
     def recurse(points, vertical):
         if len(points) <= n:
-            return bruteForce(points)
+            return brute_force(points)
         else:
             # DIVIDE
             divided = divide(points)
-            leftPoints = divided[0]
-            rightPoints = divided[1]
-            vertical = computeVertical(leftPoints, rightPoints)
-            leftHull = recurse(leftPoints, vertical)
-            rightHull = recurse(rightPoints, vertical)
+            left_points = divided[0]
+            right_points = divided[1]
+            vertical = compute_vertical(left_points, right_points)
+            left_hull = recurse(left_points, vertical)
+            right_hull = recurse(right_points, vertical)
             # CONQUER
-            while leftHull[0] != leftPoints[-1]:
+            while left_hull[0] != left_points[-1]:
                 # points[-1] = right most point of subproblem
-                leftHull.rotate(1)
-            while rightHull[0] != rightPoints[0]:
+                left_hull.rotate(1)
+            while right_hull[0] != right_points[0]:
                 # points[0] = left most point of subproblem
-                rightHull.rotate(1)
-            tangents = twoFinger(leftHull, rightHull, vertical)
-            upperTangent = tangents[0]
-            lowerTangent = tangents[1]
-            return cutAndPaste(leftHull, rightHull, upperTangent, lowerTangent)
+                right_hull.rotate(1)
+            tangents = two_finger(left_hull, right_hull, vertical)
+            upper_tangent = tangents[0]
+            lower_tangent = tangents[1]
+            return cut_and_paste(left_hull, right_hull, upper_tangent, lower_tangent)
+
     divided = divide(points)
-    return recurse(points, computeVertical(divided[0], divided[1]))
+    return recurse(points, compute_vertical(divided[0], divided[1]))
